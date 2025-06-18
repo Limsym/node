@@ -25,3 +25,13 @@ export async function POST(request) {
     headers: { "Content-Type": "application/json" }
   });
 }
+
+
+const data = await openaiRes.json();
+
+return new Response(JSON.stringify({
+  reply: data.choices?.[0]?.message?.content ?? "GPT 没有返回内容。",
+  raw: data // ✅ 把原始 JSON 也返回
+}), {
+  headers: { "Content-Type": "application/json" }
+});
