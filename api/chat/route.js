@@ -6,7 +6,7 @@ export async function POST(request) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `process.env.OPENAI_API_KEY`
+      "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
     },
     body: JSON.stringify({
       model: "gpt-3.5-turbo", // 或 "gpt-4" 如果你有权限
