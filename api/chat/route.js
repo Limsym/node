@@ -1,37 +1,49 @@
-export async function POST(request) {
-  const body = await request.json();
-  const userMessage = body.message;
+export async function POST(req) {
+  try {
+    const { message } = await req.json();
 
-  const openaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
-    },
-    body: JSON.stringify({
-      model: "gpt-3.5-turbo", // 或 "gpt-4" 如果你有权限
+    const payload = {
+      model: "gpt-3.5-turbo", // 或 "gpt-4" 你有哪个 key 就写哪个
       messages: [
-        { role: "system", content: "你是一位温和聪明的AI助理，正在协助冷世聪。" },
-        { role: "user", content: userMessage }
+        { role: "system", content: "You are a helpful assistant." },
+        { role: "user", content: message }
       ],
       temperature: 0.7
-    })
-  });
+    };
 
-  const data = await openaiRes.json();
-  const reply = data.choices?.[0]?.message?.content ?? "GPT 没有返回内容。";
+    // 发起 OpenAI 请求
+    const openaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
 
-  return new Response(JSON.stringify({ reply }), {
-    headers: { "Content-Type": "application/json" }
-  });
+    const data = await openaiRes.json();
+
+    // 打印调试日志
+    console.log("🎯 请求体 payload:", JSON.stringify(payload, null, 2));
+    console.log("📩 GPT 响应:", JSON.stringify(data, null, 2));
+
+    const replyContent = data?.choices?.[0]?.message?.content;
+
+    return new Response(JSON.stringify({
+      reply: replyContent ?? "GPT 没有返回内容。",
+      raw: data
+    }), {
+      headers: { "Content-Type": "application/json" }
+    });
+
+  } catch (error) {
+    console.error("❌ 错误:", error);
+    return new Response(JSON.stringify({
+      reply: "请求失败，请检查后端日志。",
+      error: String(error)
+    }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" }
+    });
+  }
 }
-
-
-const data = await openaiRes.json();
-
-return new Response(JSON.stringify({
-  reply: data.choices?.[0]?.message?.content ?? "GPT 没有返回内容。",
-  raw: data // ✅ 把原始 JSON 也返回
-}), {
-  headers: { "Content-Type": "application/json" }
-});
