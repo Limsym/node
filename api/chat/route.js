@@ -39,21 +39,15 @@ export async function POST(request) {
 
     const data = await openaiRes.json();
 
-    // ✅ 主动调试输出
-    if (process.env.NODE_ENV === "development") {
-      console.log("🧠 GPT response:", JSON.stringify(data, null, 2));
-    }
+    // 🧪 无论环境，都打印出来 GPT 的原始响应内容
+    console.log("🧠 OpenAI 返回内容:", JSON.stringify(data, null, 2));
+    
+    // ✅ 安全提取 reply 内容
+    const reply = data?.choices?.[0]?.message?.content ?? "⚠️ GPT 没有返回内容。";
+    
+    return Response.json({ reply });
 
-    if (data?.choices?.[0]?.message?.content) {
-      return Response.json({
-        reply: data.choices[0].message.content
-      });
-    } else {
-      console.error("❌ Unexpected OpenAI response:", data);
-      return Response.json({
-        reply: "⚠️ GPT 没有返回预期内容。请检查日志或 API Key。"
-      });
-    }
+    
 
   } catch (error) {
     console.error("🔥 GPT 请求出错：", error);
