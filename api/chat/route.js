@@ -4,7 +4,8 @@ export async function POST(request) {
   const body = await request.json();
   const userMessage = body.message;
 
-  const apiKey = process.env.OPENAI_API_KEY;
+  const apiKey = "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"
+    // process.env.OPENAI_API_KEY;
 
   // 🔧 调试模式 fallback
   if (!apiKey) {
